@@ -1,0 +1,66 @@
+# File: iotapp.kv
+# Updated UI with dedicated fetch buttons and a scrollable results area.
+
+BoxLayout:
+    orientation: 'vertical'
+    padding: 30
+    spacing: 15
+
+    # Top section for data fetching controls
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 10
+        size_hint_y: None
+        height: '48dp'
+
+        Button:
+            text: 'Get Latest Reading'
+            on_press: app.get_latest_reading()
+
+        Button:
+            text: 'Get Last 3 Readings'
+            on_press: app.get_last_3_readings()
+
+    # A separator line
+    Label:
+        size_hint_y: None
+        height: '2dp'
+        canvas.before:
+            Color:
+                rgba: 0.5, 0.5, 0.5, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+    # Scrollable area to show telemetry results
+    ScrollView:
+        size_hint: (1, 1)
+        do_scroll_x: False
+
+        Label:
+            id: results_label
+            text: 'Press a button to fetch data...'
+            font_size: '16sp'
+            size_hint_y: None
+            height: self.texture_size[1] # Make label height fit its content
+            text_size: self.width, None    # Enable text wrapping
+            padding: (10, 10)
+
+    # Bottom section for sending commands
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 20
+        size_hint_y: None
+        height: '48dp'
+
+        Button:
+            text: 'Turn ON'
+            font_size: '20sp'
+            # Note: Your backend code does not have a command endpoint.
+            # This is a placeholder for that functionality.
+            on_press: app.send_command('on')
+
+        Button:
+            text: 'Turn OFF'
+            font_size: '20sp'
+            on_press: app.send_command('off')
