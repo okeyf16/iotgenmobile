@@ -1,0 +1,127 @@
+# File: iotapp.kv
+# Final version with Python-controlled checkbox styling.
+
+# 1. STYLE RULE UPDATED FOR THE PYTHON CLASS
+# This rule now styles our custom DeviceCheckBox class from main.py
+<DeviceCheckBox>:
+    size_hint: None, None
+    size: dp(32), dp(32)
+    
+    canvas.before:
+        Clear:
+        Color:
+            rgba: (1, 1, 1, 1) # White color
+        Line:
+            circle: (self.center_x, self.center_y, self.height / 2 - dp(2))
+            width: 1.5
+
+    canvas.after:
+        # ** THE FIX IS HERE **
+        # The color is now bound to the 'inner_circle_color' property
+        # that we control from our Python code.
+        Color:
+            rgba: self.inner_circle_color
+        Ellipse:
+            pos: self.center_x - dp(6), self.center_y - dp(6)
+            size: dp(12), dp(12)
+
+
+# MAIN APP LAYOUT
+BoxLayout:
+    orientation: 'vertical'
+    padding: 30
+    spacing: 15
+
+    # Top section for data fetching controls
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 10
+        size_hint_y: None
+        height: '48dp'
+
+        Button:
+            text: 'Get Latest Reading'
+            on_press: app.get_latest_reading()
+
+        Button:
+            text: 'Get Last 3 Readings'
+            on_press: app.get_last_3_readings()
+
+    # Section using the new DeviceCheckBox
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 5
+        size_hint_y: None
+        height: '48dp'
+
+        Label:
+            text: 'Telemetry Device:'
+            size_hint_x: 0.6
+            halign: 'left'
+            text_size: self.size
+
+        # Wrapper to make the checkbox and its label clickable together
+        BoxLayout:
+            on_touch_down:
+                if self.collide_point(*args[1].pos): pi_checkbox.active = True
+            DeviceCheckBox:
+                id: pi_checkbox
+                group: 'device_select'
+                active: True
+                on_active: if self.active: app.set_telemetry_device_id("Raspberry Pi Web Client")
+            Label:
+                text: 'Raspberry Pi'
+
+        # Wrapper for the second option
+        BoxLayout:
+            on_touch_down:
+                if self.collide_point(*args[1].pos): sim_checkbox.active = True
+            DeviceCheckBox:
+                id: sim_checkbox
+                group: 'device_select'
+                on_active: if self.active: app.set_telemetry_device_id("SimDevice01")
+            Label:
+                text: 'SimDevice01'
+
+    # A separator line
+    Label:
+        size_hint_y: None
+        height: '2dp'
+        canvas.before:
+            Color:
+                rgba: 0.5, 0.5, 0.5, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+    # Scrollable area to show telemetry results
+    ScrollView:
+        size_hint: (1, 1)
+        do_scroll_x: False
+
+        Label:
+            id: results_label
+            markup: True
+            text: 'Press a button to fetch data...'
+            font_size: '16sp'
+            size_hint_y: None
+            height: self.texture_size[1]
+            text_size: self.width, None
+            padding: (10, 10)
+
+    # Bottom section for sending commands
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 20
+        size_hint_y: None
+        height: '48dp'
+
+        Button:
+            text: 'Turn ON'
+            font_size: '20sp'
+            on_press: app.send_command('on')
+
+        Button:
+            text: 'Turn OFF'
+            font_size: '20sp'
+            on_press: app.send_command('off')
